@@ -109,4 +109,18 @@ class Statsd
   end
 
   def socket; @socket ||= UDPSocket.new end
+
+  def self.setup(options)
+    params = [
+              options[:host] || "localhost",
+              options[:port]
+             ].compact
+    @instance = self.new(*params)
+  end
+  
+  def self.method_missing(m, *args, &block)
+    raise Exception.new("Call 'setup' and let me know where statsd is!") unless @instance
+    @instance.__send__(m, *args, &block)
+  end
 end
+
