@@ -100,7 +100,7 @@ class Statsd
   end
 
   def get_namespace
-    @@namespace || @namespace
+    self.class.namespace || namespace
   end
 
   def send(stat, delta, type, sample_rate=1)
