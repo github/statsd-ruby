@@ -13,7 +13,13 @@ require 'socket'
 #   statsd = Statsd.new('localhost').tap{|sd| sd.namespace = 'account'}
 #   statsd.increment 'activate'
 class Statsd
-  # A namespace to prepend to all statsd calls.
+
+  # Class global namespace to prepend to all statsd calls.
+  class << self
+    attr_accessor :namespace
+  end
+
+  # Instance namespace to prepend to all statsd calls. Overrides class global namespace.
   attr_accessor :namespace
 
   #characters that will be replaced with _ in stat names
@@ -93,9 +99,13 @@ class Statsd
     yield unless sample_rate < 1 and rand > sample_rate
   end
 
+  def get_namespace
+    @@namespace || @namespace
+  end
+
   def send(stat, delta, type, sample_rate=1)
     sampled(sample_rate) do
-      prefix = "#{@namespace}." unless @namespace.nil?
+      prefix = "#{get_namespace}." unless get_namespace.nil?
       stat = stat.to_s.gsub('::', '.').gsub(RESERVED_CHARS_REGEX, '_')
       send_to_socket("#{prefix}#{stat}:#{delta}|#{type}#{'|@' << sample_rate.to_s if sample_rate < 1}")
     end
