@@ -2,7 +2,7 @@ require 'socket'
 
 # = Statsd: A Statsd client (https://github.com/etsy/statsd)
 #
-# @example Set up a global Statsd client for a server on localhost:9125
+# @example Set up a global Statsd client for a server on localhost:8125
 #   $statsd = Statsd.new 'localhost', 8125
 # @example Send some stats
 #   $statsd.increment 'garets'
