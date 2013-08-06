@@ -21,6 +21,14 @@ describe Statsd do
     it "should default the port to 8125" do
       Statsd.new('localhost').instance_variable_get('@port').must_equal 8125
     end
+    
+    it "should resolve localhost to an 127.0.0.1" do
+      @statsd.instance_variable_get('@host').must_equal '127.0.0.1'
+    end
+    
+    it "should resolve ip addresses correctly" do
+      Statsd.new('127.0.0.1').instance_variable_get('@host').must_equal '127.0.0.1'
+    end
   end
 
   describe "#increment" do
