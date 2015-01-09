@@ -169,7 +169,6 @@ describe Statsd do
   end
 
   describe "stat names" do
-
     it "should accept anything as stat" do
       @statsd.increment(Object, 1)
     end
@@ -185,7 +184,56 @@ describe Statsd do
       @statsd.increment('ray@hostname.blah|blah.blah:blah', 1)
       @statsd.socket.recv.must_equal ['ray_hostname.blah_blah.blah_blah:1|c']
     end
+  end
 
+  describe "should support direct calls" do
+    before do
+      Statsd.clear_setup
+      Statsd.setup(:host => "localhost", :port => 1234)
+      @instance = Statsd.instance_variable_get('@instance')
+      class << @instance
+        public :sampled # we need to test this
+        attr_reader :host, :port # we also need to test this
+        def socket; @socket ||= FakeUDPSocket.new end
+      end
+    end
+    
+    it 'should complain if setup has not been called' do
+      Statsd.clear_setup
+      assert_raises(Statsd::ConfigError) do
+        Statsd.timing("dummy", rand)
+      end
+    end
+
+    it 'should setup instance correctly' do
+      @instance.host.must_equal 'localhost'
+      @instance.port.must_equal 1234
+    end
+    
+    it "should support increment" do
+      Statsd.increment('foobar')
+      @instance.socket.recv.must_equal ['foobar:1|c']
+    end
+
+    it "should support decrement" do
+      Statsd.decrement('foobar')
+      @instance.socket.recv.must_equal ['foobar:-1|c']
+    end
+
+    it "should support timing" do
+      t = 100
+      Statsd.timing('foobar', t)
+      @instance.socket.recv.must_equal ["foobar:#{t}|ms"]
+    end
+
+    it "should support time" do
+      Statsd.time('foobar') { sleep(0.001); 'test' }
+      @instance.socket.recv.must_equal ['foobar:1|ms']
+    end
+
+    it "should support sampled" do
+      Statsd.sampled(1) { :yielded }.must_equal :yielded
+    end
   end
 
 end

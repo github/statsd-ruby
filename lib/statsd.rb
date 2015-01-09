@@ -16,6 +16,8 @@ require 'time'
 #   statsd = Statsd.new('localhost').tap{|sd| sd.namespace = 'account'}
 #   statsd.increment 'activate'
 class Statsd
+  class ConfigError < StandardError; end;
+  
   # A namespace to prepend to all statsd calls.
   attr_accessor :namespace
 
@@ -134,4 +136,22 @@ class Statsd
   end
 
   def socket; @socket ||= UDPSocket.new end
+
+  def self.setup(options={})
+    params = [
+              options[:host] || "localhost",
+              options[:port]
+             ].compact
+    @instance = self.new(*params)
+  end
+
+  def self.clear_setup
+    @instance = nil
+  end
+  
+  def self.method_missing(m, *args, &block)
+    raise ConfigError.new("I'm not setup()") unless @instance
+    @instance.__send__(m, *args, &block)
+  end
 end
+
