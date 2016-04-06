@@ -127,6 +127,14 @@ describe Statsd do
     end
   end
 
+  describe "#batch" do
+    it "should yield itself" do
+      @statsd.batch { |s|
+        s.must_equal @statsd
+      }
+    end
+  end
+
   describe "with namespace" do
     before { @statsd.namespace = 'service' }
 
