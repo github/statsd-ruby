@@ -184,6 +184,12 @@ class Statsd
   # for the stat.
   def histogram(stat, value, sample_rate=1); send stat, value, HISTOGRAM_TYPE, sample_rate end
 
+  # Provided for backwards compatibility to systems that expect a batch method.
+  # Buffering will transparently be used if its enabled, otherwise this is a noop.
+  def batch
+    yield self
+  end
+
   private
   def sampled(sample_rate)
     yield unless sample_rate < 1 and rand > sample_rate
