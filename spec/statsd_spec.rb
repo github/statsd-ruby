@@ -21,6 +21,17 @@ describe GitHub::Statsd do
       statsd = GitHub::Statsd.new(FakeUDPSocket)
       statsd.client_class.must_equal FakeUDPSocket
     end
+
+    it "should allow literal IPv6 addresses" do
+      [
+        '0000:0000:0000:0000:0000:0000:0000:0001',
+        '::1'
+      ].each do |ipv6_addr|
+        statsd = GitHub::Statsd.new
+        statsd.add_shard ipv6_addr, 8125
+        statsd.shards.first.sock.addr[0].must_equal 'AF_INET6'
+      end
+    end
   end
 
   describe "#increment" do

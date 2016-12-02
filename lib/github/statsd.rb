@@ -19,7 +19,7 @@ module GitHub
       attr_reader :sock
 
       def initialize(address, port = nil)
-        address, port = address.split(':') if address.include?(':')
+        address, port = address.split(':') if address.count(':') == 1
         addrinfo = Addrinfo.ip(address)
 
         @sock = UDPSocket.new(addrinfo.pfamily)
