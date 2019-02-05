@@ -68,6 +68,13 @@ describe GitHub::Statsd do
     end
   end
 
+  describe "#distribution" do
+    it "should format the message according to the statsd spec" do
+      @statsd.distribution('foobar', 500)
+      @statsd.shards.first.recv.must_equal ["foobar:500|d"]
+    end
+  end
+
   describe "#time" do
     it "should format the message according to the statsd spec" do
       @statsd.time('foobar') { sleep(0.001); 'test' }
