@@ -91,6 +91,7 @@ module GitHub
     TIMING_TYPE = "ms".freeze
     GAUGE_TYPE = "g".freeze
     HISTOGRAM_TYPE = "h".freeze
+    DISTRIBUTION_TYPE = "d".freeze
 
     def initialize(client_class = nil)
       @shards = []
@@ -187,6 +188,11 @@ module GitHub
     # statsd server then uses the sample_rate to correctly track the average
     # for the stat.
     def histogram(stat, value, sample_rate=1); send stat, value, HISTOGRAM_TYPE, sample_rate end
+    
+    # A modified gauge that submits a distribution of values over a sample period.
+    # Arithmetic and statistical calculations (percetiles, average, etc.) on the data set
+    # are peformed server side rather than client side like a histogram.
+    def distribution(stat, value, sample_rate=1); send stat, value, DISTRIBUTION_TYPE, sample_rate end
 
     private
     def sampled(sample_rate)
